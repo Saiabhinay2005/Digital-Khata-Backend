@@ -12,11 +12,7 @@ const Transaction = require("./models/Transaction");
 const app = express();
 
 /* ✅ CORS FIX */
-app.use(cors({
-  origin: "https://digital-khata-six.vercel.app",  // your frontend
-  credentials: true
-}));
-
+app.use(cors());
 /* ✅ Middleware */
 app.use(express.json());
 
