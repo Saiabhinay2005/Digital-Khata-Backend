@@ -1,9 +1,11 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const axios = require("axios"); // ✅ NEW
-
 require("dotenv").config();
+
+const authRoutes = require("./routes/auth");
+const auth = require("./middleware/auth");
+
 const Customer = require("./models/Customer");
 const Transaction = require("./models/Transaction");
 
@@ -11,6 +13,9 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+
+// ✅ Auth routes
+app.use("/api/auth", authRoutes);
 
 /* ✅ Connect MongoDB */
 mongoose.connect(process.env.MONGO_URL)
@@ -22,11 +27,17 @@ app.get("/", (req, res) => {
   res.send("Backend running ✅");
 });
 
-/* ✅ Add Customer */
-app.post("/customers", async (req, res) => {
+/* ✅ Add Customer (PROTECTED) */
+app.post("/customers", auth, async (req, res) => {
   try {
     const { name, phone, village } = req.body;
-    const newCustomer = new Customer({ name, phone, village });
+
+    const newCustomer = new Customer({
+      name,
+      phone,
+      village,
+      userId: req.user.userId   // ✅ attach user
+    });
 
     await newCustomer.save();
     res.json(newCustomer);
@@ -35,14 +46,17 @@ app.post("/customers", async (req, res) => {
   }
 });
 
-/* ✅ Get Customers */
-app.get("/customers", async (req, res) => {
-  const customers = await Customer.find();
+/* ✅ Get Customers (PROTECTED + FILTERED) */
+app.get("/customers", auth, async (req, res) => {
+  const customers = await Customer.find({
+    userId: req.user.userId   // ✅ filter per user
+  });
+
   res.json(customers);
 });
 
-/* ✅ Delete */
-app.delete("/customers/:id", async (req, res) => {
+/* ✅ Delete Customer (PROTECTED) */
+app.delete("/customers/:id", auth, async (req, res) => {
   try {
     const customerId = req.params.id;
 
@@ -58,8 +72,8 @@ app.delete("/customers/:id", async (req, res) => {
   }
 });
 
-/* ✅ Add Transaction */
-app.post("/transactions", async (req, res) => {
+/* ✅ Add Transaction (PROTECTED) */
+app.post("/transactions", auth, async (req, res) => {
   try {
     const { customerId, type, amount, items, remarks, date } = req.body;
 
@@ -69,7 +83,8 @@ app.post("/transactions", async (req, res) => {
       amount,
       items,
       remarks,
-      date
+      date,
+      userId: req.user.userId   // ✅ attach user
     });
 
     await newTx.save();
@@ -79,15 +94,14 @@ app.post("/transactions", async (req, res) => {
   }
 });
 
-/* ✅ Get Transactions */
-app.get("/transactions", async (req, res) => {
-  const txs = await Transaction.find();
+/* ✅ Get Transactions (PROTECTED + FILTERED) */
+app.get("/transactions", auth, async (req, res) => {
+  const txs = await Transaction.find({
+    userId: req.user.userId   // ✅ filter
+  });
+
   res.json(txs);
 });
-
-
-
-
 
 /* ✅ Server */
 app.listen(5000, () => {

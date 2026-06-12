@@ -1,13 +1,17 @@
 const mongoose = require("mongoose");
 
 const transactionSchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true   // ✅ link to user
+  },
   customerId: {
     type: String,
     required: true
   },
   type: {
     type: String,
-    required: true  // "KHATA" or "PAYMENT"
+    required: true  // KHATA or PAYMENT
   },
   amount: {
     type: Number,
