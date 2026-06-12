@@ -14,6 +14,7 @@ const app = express();
 /* ✅ CORS FIX */
 app.use(cors());
 /* ✅ Middleware */
+console.log("✅ NEW BACKEND CODE DEPLOYED");
 app.use(express.json());
 
 /* ✅ Routes */
