@@ -6,13 +6,13 @@ const customerSchema = new mongoose.Schema({
     required: true,   
   },
   name: String,
-  phone: {
-    type: String,
-    required: true
-   
-  },
+phone: {
+  type: String,
+  required: true,
+  unique: true
+}
+,
   village: String
 });
 
 module.exports = mongoose.model("Customer", customerSchema);
-``
